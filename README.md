@@ -37,17 +37,25 @@ Design properties:
 
 ## Measured behavior
 
-From a live replay experiment on a production RAG pipeline (10 queries + one planted
-injection; details and caveats in the repo this was extracted from):
+Replay experiment against a production RAG pipeline (156-chunk corpus of Chinese
+patent/academic PDFs, hybrid BM25+dense+RRF with a local cross-encoder reranker,
+`max_passages=6`, 4-way concurrent judging). Two query pools: 18 on-topic queries
+derived from the corpus, and 12 off-topic queries whose correct answer set is
+empty — a clean ground truth for over-filtering. Three planted prompt-injection
+passages (direct instruction override, fake system rule, credential phishing).
+Human audit of dropped passages. Not a benchmark; single corpus, small samples.
 
 | Check | Result |
 |---|---|
-| Planted instruction-injection passage | ranked into results by similarity, caught and excluded by the gate (injection score) |
-| On-topic queries | mean top-8 Jaccard overlap vs ungated baseline 0.835; manual inspection showed drops were peripheral passages |
-| Off-topic queries (4) | every judged head candidate correctly dropped |
-| Gate overhead | ~2.8 s per query with 6 judged candidates, 4-way concurrent (1.1 s median per Jev call) |
+| Off-topic queries (clean ground truth) | **12/12** had all 6 judged head candidates dropped — zero false keeps |
+| On-topic queries | mean top-8 overlap vs ungated baseline **0.794**; mean **2.3/6** judged candidates dropped; **5/18** queries kept everything |
+| On-topic drop audit (human) | dropped passages were template text, background paragraphs, formulas and off-aspect content; no evidence-bearing passage lost in the audited sample |
+| Planted prompt injections | **3/3** surfaced by similarity ranking and all excluded by the gate |
+| Conflict channel | triggered on 0 queries in this corpus (no premise-contradicting passages present); exercised in unit tests |
+| Gate overhead | mean **5.0 s**, p95 **16.9 s** per query (6 judged candidates, 4-way concurrent; tail inflated by provider rate-limit retries; the pipeline's own rerank stage costs ~35 s, so relative overhead is ~12%) |
 
-These are small-sample numbers meant as sanity evidence, not a benchmark.
+Thresholds were the cookbook defaults (0.45 / 0.70 / 0.70) and were not tuned on
+this corpus.
 
 ## Install
 
