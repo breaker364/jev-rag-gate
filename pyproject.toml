@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jev-rag-gate"
+version = "0.1.0"
+description = "Semantic gating for RAG retrieval candidates (relevance, premise contradiction, prompt injection) using the TypeSafe Jev System One model"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "breaker364" }]
+requires-python = ">=3.10"
+dependencies = ["httpx>=0.27"]
+keywords = ["rag", "retrieval", "jev", "typesafe", "guardrails", "semantic-filtering", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Indexing",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["jev_rag_gate*"]
